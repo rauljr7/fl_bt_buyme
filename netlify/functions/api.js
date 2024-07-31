@@ -307,7 +307,7 @@ let create_order = async (request_object) => {
 // Create Client Token
 let create_client_token = async (options = { fastlane: false }) => {
     try {
-        let auth = Buffer.from(`${public_key}:${private_key}`).toString("base64");
+        let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
         let fetch_options = {
             method: 'POST',
             headers: {
@@ -330,14 +330,14 @@ let create_client_token = async (options = { fastlane: false }) => {
                 variables: {
                     input: {
                         clientToken: {
-                            domains: fastlane_approved_domains_csv.split(',')
+                            domains: FASTLANE_APPROVED_DOMAINS_CSV.split(',')
                         },
                     },
                 },
             });
         }
 
-        let response = await fetch(braintree_api_base_url, fetch_options);
+        let response = await fetch(BRAINTREE_API_BASE_URL, fetch_options);
         let data = await response.json();
 
         if (response.ok) {
