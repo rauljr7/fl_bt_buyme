@@ -7,7 +7,7 @@ let device_data;
 let profile;
 let FastlanePaymentComponent;
 let FastlaneWatermarkComponent;
-let access_token;
+let braintree_client_token;
 let braintree_client_instance;
 let data_collector_instance;
 let client_id;
@@ -67,8 +67,9 @@ function get_auth() {
 }
 // Initializes payment options by setting up Fastlane and PayPal buttons through Braintree SDK.
 async function init_payment_options(data) {
+    braintree_client_token = data.client_token;
     braintree_client_instance = await braintree.client.create({
-        authorization: data.clientToken
+        authorization: braintree_client_token
     });
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
@@ -109,7 +110,7 @@ async function init_fastlane_methods() {
         }
     }
     fastlane = await braintree.fastlane.create({
-        authorization: data.clientToken,
+        authorization: braintree_client_token,
         client: braintree_client_instance,
         deviceData: device_data,
         styles: fastlane_style_object
