@@ -42,7 +42,7 @@ let tokenize_response;
 let tokenize_id;
 let order_id;
 let server_endpoint = "/.netlify/functions/api/"; // Replace with your own server endpoint
-let single_use_token;
+let payment_method_nonce;
 let fastlane_options_object;
 let payment_source;
 
@@ -224,7 +224,7 @@ async function init_fastlane_methods() {
                 console.log("tokenize response", tokenize_response);
                 // Payment source type can be extracted in response
                 payment_source = Object.keys(tokenize_response.paymentSource)[0];
-                process_payment({ "single_use_token": tokenize_response.id, "payment_source": payment_source });
+                process_payment({ "payment_method_nonce": tokenize_response.id, "payment_source": payment_source });
             }
             //User passed OTP (fastlane user)
             else {
@@ -241,7 +241,7 @@ function process_authenticated_user() {
     let name = profile_data.name;
     let shippingAddress = profile_data.shippingAddress;
     let card = profile_data.card;
-    process_payment({ "single_use_token": card.id, "payment_source": "card" });
+    process_payment({ "payment_method_nonce": card.id, "payment_source": "card" });
 }
 // Avoid fastlane lookups of a string unless user has entered a valid email
 function handle_email_input() {
@@ -301,14 +301,14 @@ function handle_guest_payer() {
 }
 // Processes the payment using the provided tokenize ID and payment source.
 async function process_payment(object) {
-    single_use_token = object.single_use_token;
+    payment_method_nonce = object.payment_method_nonce;
     payment_source = object.payment_source;
     order_id = object.order_id;
     console.log("Processing payment, have this profile data avail:", profile_data);
     // Determine the method based on the payment source
     if (payment_source === "card") {
         method = "card_order";
-        console.log(`Processing payment with single_use_token: ${single_use_token} and payment_source: ${payment_source}`);
+        console.log(`Processing payment with payment_method_nonce: ${payment_method_nonce} and payment_source: ${payment_source}`);
     } else {
         method = "complete_order";
         console.log(`Processing payment with order_id: ${order_id} and payment_source: ${payment_source}`);
@@ -322,7 +322,7 @@ async function process_payment(object) {
             amount: amount_input_element.value,
             order_id: order_id,
             payment_source: payment_source,
-            single_use_token: single_use_token
+            payment_method_nonce: payment_method_nonce
         })
     };
     try {
