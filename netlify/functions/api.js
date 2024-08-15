@@ -130,7 +130,7 @@ let capture_paypal_order = async (order_id) => {
         let access_token_response = await get_access_token();
         let access_token = access_token_response.access_token;
         let url = `${BRAINTREE_API_BASE_URL}/v2/checkout/orders/${order_id}/capture`;
-
+        console.log("How does this work?:", url);
         let capture_request = await fetch(url, {
             method: "POST",
             headers: {
