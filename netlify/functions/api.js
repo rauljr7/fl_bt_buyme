@@ -336,10 +336,10 @@ let create_client_token = async (options = { fastlane: false }) => {
                 },
             });
         }
-
+        
         let response = await fetch(BRAINTREE_API_BASE_URL, fetch_options);
         let data = await response.json();
-
+        console.log("Braintree Create Client Token Response:", JSON.stringify(data, null, 2));
         if (response.ok) {
             return data.data.createClientToken.clientToken;
         } else {
