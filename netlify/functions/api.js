@@ -249,6 +249,7 @@ let charge_payment_method = async (request_object) => {
                             quantity: item.quantity,
                             unitAmount: item.unitAmount,
                             totalAmount: item.totalAmount,
+                            kind: "DEBIT",
                             itemType: item.itemType
                         })),
                         shipping: transaction_details.shipping
