@@ -266,7 +266,7 @@ let charge_payment_method = async (request_object) => {
         console.log("Payload before charging payment method:", JSON.stringify(gql_payload, null, 2));
 
         let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
-        let charge_payment_request = await fetch(endpoint, {
+        let charge_payment_request = await fetch(BRAINTREE_API_BASE_URL, {
             headers: {
                 "Content-Type": "application/json",
                 'Authorization': `Basic ${auth}`,
