@@ -264,7 +264,7 @@ let charge_payment_method = async (request_object) => {
             gql_payload.variables.input.transaction.descriptor = {
                 name: "BIZNAMEEHERE*",
                 phone: "1234567890",
-                url: "https://example.com"
+                url: "example.com"
             };
         }
 
