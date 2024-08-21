@@ -80,7 +80,7 @@ async function init_payment_options(data) {
           currency: 'USD',
           intent: 'capture' // Fastlane only supports straight capture
         });
-      })
+      });
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
     });
