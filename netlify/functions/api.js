@@ -68,8 +68,8 @@ let handle_fastlane_auth = async () => {
 // Handle Card Order
 let handle_card_order = async (request_body) => {
     try {
-        let { amount, payment_source, single_use_token, shipping_address } = request_body;
-        let create_order_response = await charge_payment_method({ amount, payment_source, single_use_token, shipping_address });
+        let { amount, payment_source, payment_method_nonce, shipping_address } = request_body;
+        let create_order_response = await charge_payment_method({ amount, payment_source, payment_method_nonce, shipping_address });
 
         return {
             statusCode: 200,
@@ -175,12 +175,12 @@ let capture_paypal_order = async (order_id) => {
 // https://graphql.braintreepayments.com/reference/#Mutation--chargePaymentMethod
 let charge_payment_method = async (request_object) => {
     try {
-        let { amount, payment_source, single_use_token, shipping_address } = request_object;
+        let { amount, payment_source, payment_method_nonce, shipping_address } = request_object;
 
         // Set up the basic transaction details
         let transaction_details = {
             amount: amount,
-            payment_method_nonce: single_use_token,
+            payment_method_nonce: payment_method_nonce,
             line_items: [{
                 name: "Buy Me",
                 quantity: "1",
@@ -249,7 +249,7 @@ let charge_payment_method = async (request_object) => {
                             quantity: item.quantity,
                             unitAmount: item.unitAmount,
                             totalAmount: item.totalAmount,
-                            itemType: item.itemType  // Adjusted per your correction
+                            itemType: item.itemType
                         })),
                         shipping: transaction_details.shipping
                     }
