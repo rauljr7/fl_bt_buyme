@@ -9,6 +9,7 @@ let FastlanePaymentComponent;
 let FastlaneWatermarkComponent;
 let braintree_client_token;
 let braintree_client_instance;
+let paypal_checkout_instance;
 let data_collector_instance;
 let client_id;
 let fastlane_style_object;
@@ -75,7 +76,8 @@ async function init_payment_options(data) {
     await braintree.paypalCheckout.create({
           client: braintree_client_instance
         }).then(function (paypalCheckoutInstance) {
-        return paypalCheckoutInstance.loadPayPalSDK({
+        paypal_checkout_instance = paypalCheckoutInstance;
+        return paypal_checkout_instance.loadPayPalSDK({
           currency: 'USD',
           intent: 'capture', // Fastlane only supports straight capture
           'enable-funding': 'venmo'
@@ -354,7 +356,7 @@ async function process_payment(object) {
 function bootstrap_standard_button(options_object) {
     paypal_button_options = {
         createOrder: function () {
-            return paypalCheckoutInstance.createPayment({
+            return paypal_checkout_instance.createPayment({
               flow: 'checkout', // Required
               amount: amount_input_element.value, // Required
               currency: 'USD', // Required, must match the currency passed in with loadPayPalSDK
