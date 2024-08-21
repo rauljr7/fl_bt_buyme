@@ -70,13 +70,23 @@ async function init_payment_options(data) {
     braintree_client_token = data.client_token;
     braintree_client_instance = await braintree.client.create({
         authorization: braintree_client_token
-    });
+    }).then(function (clientInstance) {
+        // Create a PayPal Checkout component.
+        return braintree.paypalCheckout.create({
+          client: clientInstance
+        });
+      }).then(function (paypalCheckoutInstance) {
+        return paypalCheckoutInstance.loadPayPalSDK({
+          currency: 'USD',
+          intent: 'capture' // Fastlane only supports straight capture
+        });
+      })
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
     });
     device_data = data_collector_instance.deviceData;
     init_fastlane_methods();
-/*     paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
+    paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
         shape: "rect",
         color: "gold",
         label: "paypal",
@@ -84,7 +94,7 @@ async function init_payment_options(data) {
     }});
     paypal_button.render("#paypal_button_container");
     venmo_button = bootstrap_standard_button({ fundingSource: "venmo" });
-    venmo_button.render("#venmo_button_container"); */
+    venmo_button.render("#venmo_button_container");
 }
 // Initializes Fastlane methods and sets up event handlers.
 async function init_fastlane_methods() {
