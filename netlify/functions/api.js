@@ -226,8 +226,10 @@ let charge_payment_method = async (request_object) => {
                                     last4
                                     cardholderName
                                 }
-                                ... on PayPalAccountDetails {
-                                    email
+                                ... on PayPalTransactionDetails {
+                                    payer {
+                                        email
+                                    }
                                 }
                                 ... on VenmoAccountDetails {
                                     username
