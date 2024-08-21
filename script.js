@@ -87,7 +87,7 @@ async function init_payment_options(data) {
     });
     device_data = data_collector_instance.deviceData;
     init_fastlane_methods();
-/*     paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
+    paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
         shape: "rect",
         color: "gold",
         label: "paypal",
@@ -95,7 +95,7 @@ async function init_payment_options(data) {
     }});
     paypal_button.render("#paypal_button_container");
     venmo_button = bootstrap_standard_button({ fundingSource: "venmo" });
-    venmo_button.render("#venmo_button_container"); */
+    venmo_button.render("#venmo_button_container");
 }
 // Initializes Fastlane methods and sets up event handlers.
 async function init_fastlane_methods() {
