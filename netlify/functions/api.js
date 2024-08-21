@@ -69,7 +69,7 @@ let handle_fastlane_auth = async () => {
 let handle_card_order = async (request_body) => {
     try {
         let { amount, payment_source, single_use_token, shipping_address } = request_body;
-        let create_order_response = await create_order({ amount, payment_source, single_use_token, shipping_address });
+        let create_order_response = await charge_payment_method({ amount, payment_source, single_use_token, shipping_address });
 
         return {
             statusCode: 200,
@@ -171,138 +171,173 @@ let capture_paypal_order = async (order_id) => {
     }
 };
 
-// Create Order
-// https://developer.paypal.com/docs/api/orders/v2/#orders_create
-let create_order = async (request_object) => {
+// Charge Payment Method Mutation
+// https://graphql.braintreepayments.com/reference/#Mutation--chargePaymentMethod
+let charge_payment_method = async (request_object) => {
     try {
         let { amount, payment_source, single_use_token, shipping_address } = request_object;
-        let access_token_response = await get_access_token();
-        let access_token = access_token_response.access_token;
-        let create_order_endpoint = `${BRAINTREE_API_BASE_URL}/v2/checkout/orders`;
-        let purchase_unit_object = {
-            amount: {
-                currency_code: "USD",
-                value: amount,
-                breakdown: {
-                    item_total: {
-                        currency_code: "USD",
-                        value: amount
-                    }
-                }
-            },
-            items: [{
+
+        // Set up the basic transaction details
+        let transaction_details = {
+            amount: amount,
+            payment_method_nonce: single_use_token,
+            line_items: [{
                 name: "Buy Me",
                 quantity: "1",
-                category: shipping_address ? "PHYSICAL_GOODS" : "DIGITAL_GOODS",
-                unit_amount: {
-                    currency_code: "USD",
-                    value: amount
-                }
+                itemType: shipping_address ? "physical" : "digital",
+                unitAmount: amount,
+                totalAmount: amount
             }]
         };
-        // If using shipping addresses, replace these options
-        // with the options from your server
+
+        // If shipping details exist, add them to the transaction details
+        // The shipping amounts and details below should come from the server and not be static code. This is just placeholder data.
         if (shipping_address) {
-            purchase_unit_object.shipping = {
-                options: [
-                    {
-                        id: "my_custom_shipping_option_1",
-                        label: "Free Shipping",
-                        type: "SHIPPING",
-                        selected: true,
-                        amount: {
-                            currency_code: "USD",
-                            value: "0.00"
-                        }
-                    },
-                    {
-                        id: "my_custom_shipping_option_2",
-                        label: "Basic Shipping",
-                        type: "SHIPPING",
-                        selected: false,
-                        amount: {
-                            currency_code: "USD",
-                            value: "3.50"
-                        }
-                    }
-                ],
-                name: {
-                    full_name: "John Doe"
+            transaction_details.shipping = {
+                shippingAddress: {
+                    streetAddress: shipping_address.address_line_1,
+                    extendedAddress: shipping_address.address_line_2,
+                    locality: shipping_address.admin_area_2,
+                    region: shipping_address.admin_area_1,
+                    postalCode: shipping_address.postal_code,
+                    countryCode: shipping_address.country_code
                 },
-                address: shipping_address
+                shippingAmount: "3.50",
+                shipsFromPostalCode: "85224",
+                shippingMethod: "NEXT_DAY"
             };
         }
 
-        let payload = {
-            intent: "CAPTURE",
-            purchase_units: [purchase_unit_object],
-            payment_source: {}
-        };
-        payload.payment_source[payment_source] = {
-            // "experience_context" is optional, but if the payment_source
-            // is "card" then "single_use_token" must be passed (Few lines down)
-            experience_context: {
-                brand_name: "BUY ME",
-                shipping_preference: shipping_address ? "GET_FROM_FILE" : "NO_SHIPPING",
-                user_action: "PAY_NOW",
-                payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED"
+        // Prepare the payload based on payment source
+        let gql_payload = {
+            query: `
+                mutation ChargePaymentMethod($input: ChargePaymentMethodInput!) {
+                    chargePaymentMethod(input: $input) {
+                        transaction {
+                            id
+                            status
+                            amount {
+                                value
+                                currencyCode
+                            }
+                            paymentMethod {
+                                ... on CreditCardDetails {
+                                    brandCode
+                                    last4
+                                    cardholderName
+                                }
+                                ... on PayPalAccountDetails {
+                                    email
+                                }
+                                ... on VenmoAccountDetails {
+                                    username
+                                }
+                            }
+                        }
+                    }
+                }
+            `,
+            variables: {
+                input: {
+                    paymentMethodId: transaction_details.payment_method_nonce,
+                    transaction: {
+                        amount: transaction_details.amount,
+                        lineItems: transaction_details.line_items.map(item => ({
+                            name: item.name,
+                            quantity: item.quantity,
+                            unitAmount: item.unitAmount,
+                            totalAmount: item.totalAmount,
+                            itemType: item.itemType  // Adjusted per your correction
+                        })),
+                        shipping: transaction_details.shipping
+                    }
+                }
             }
         };
+
+        // Add payment source-specific fields if applicable
         if (payment_source === "card") {
-            // https://developer.paypal.com/docs/api/orders/v2/#orders_create!path=purchase_units/soft_descriptor&t=request
-            purchase_unit_object.soft_descriptor = "BIZNAME HERE";
-            //If using card, "single_use_token" is not optional
-            payload.payment_source.card = {
-                single_use_token: single_use_token
+            // Add a descriptor for card payments
+            gql_payload.variables.input.transaction.descriptor = {
+                name: "BIZNAME HERE"  // Placeholder value for the business name field on the customer's statement
             };
         }
-        console.log("Payload before creating Order:", JSON.stringify(payload, null, 2));
-        let create_order_request = await fetch(create_order_endpoint, {
+
+        console.log("Payload before charging payment method:", JSON.stringify(gql_payload, null, 2));
+
+        let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
+        let charge_payment_request = await fetch(endpoint, {
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${access_token}`,
-                // PayPal-Request-Id shouldn't necessarily be random,
-                // but if so, store it yourself for referencing. Learn more:
-                // https://developer.paypal.com/api/rest/reference/idempotency/
-                "PayPal-Request-Id": Math.random().toString()
+                'Authorization': `Basic ${auth}`,
+                'Braintree-Version': '2020-08-25',
             },
             method: "POST",
-            body: JSON.stringify(payload)
+            body: JSON.stringify(gql_payload)
         });
-        let json_response = await create_order_request.json();
-        console.log("Order API Response:", JSON.stringify(json_response, null, 2));
-        //If fastlane order, then this is final response
+
+        let json_response = await charge_payment_request.json();
+        console.log("Charge Payment Method API Response:", JSON.stringify(json_response, null, 2));
+
+        // You always want to sanitize API responses. No need to send the full
+        // data dump to the client as to avoid unwanted data exposure
+        let sanitized_response;
         if (payment_source === "card") {
-            // You always want to sanitize API responses. No need to send the full
-            // data dump to the client as to avoid unwanted data exposure
-            let sanitized_card_capture_response = {
+            sanitized_response = {
                 amount: {
-                    value: json_response.purchase_units[0].payments.captures[0].amount.value,
-                    currency: json_response.purchase_units[0].payments.captures[0].amount.currency_code
+                    value: json_response.data.chargePaymentMethod.transaction.amount.value,
+                    currency: json_response.data.chargePaymentMethod.transaction.amount.currencyCode
                 },
                 payment_method: {
                     type: "card",
                     details: {
-                        brand: json_response.payment_source.card.brand,
-                        last_digits: json_response.payment_source.card.last_digits,
-                        name: json_response.payment_source.card.name
+                        brand: json_response.data.chargePaymentMethod.transaction.paymentMethod.brandCode,
+                        last_digits: json_response.data.chargePaymentMethod.transaction.paymentMethod.last4,
+                        name: json_response.data.chargePaymentMethod.transaction.paymentMethod.cardholderName
                     }
                 }
             };
-            return sanitized_card_capture_response;
+        } else if (payment_source === "paypal") {
+            sanitized_response = {
+                amount: {
+                    value: json_response.data.chargePaymentMethod.transaction.amount.value,
+                    currency: json_response.data.chargePaymentMethod.transaction.amount.currencyCode
+                },
+                payment_method: {
+                    type: "paypal",
+                    details: {
+                        email: json_response.data.chargePaymentMethod.transaction.paymentMethod.email
+                    }
+                }
+            };
+        } else if (payment_source === "venmo") {
+            sanitized_response = {
+                amount: {
+                    value: json_response.data.chargePaymentMethod.transaction.amount.value,
+                    currency: json_response.data.chargePaymentMethod.transaction.amount.currencyCode
+                },
+                payment_method: {
+                    type: "venmo",
+                    details: {
+                        username: json_response.data.chargePaymentMethod.transaction.paymentMethod.username
+                    }
+                }
+            };
         }
-        //Otherwise you have just created an Order and not finalized a payment
-        else {
-            return { id: json_response.id};
-        }
+        // Add more if needed
+        // https://graphql.braintreepayments.com/reference/#union--paymentmethoddetails
+
+        return sanitized_response;
+
     } catch (error) {
-        console.error("Error creating order:", error);
+        console.error("Error processing payment:", error);
         return {
             statusCode: 400,
             body: error.toString()
         };
     }
 };
+
 
 // Create Client Token
 let create_client_token = async (options = { fastlane: false }) => {
