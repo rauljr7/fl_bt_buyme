@@ -75,9 +75,11 @@ async function init_payment_options(data) {
     await braintree.paypalCheckout.create({
           client: braintree_client_instance
         }).then(function (paypalCheckoutInstance) {
+            console.log("here");
         return paypalCheckoutInstance.loadPayPalSDK({
           currency: 'USD',
-          intent: 'capture' // Fastlane only supports straight capture
+          intent: 'capture', // Fastlane only supports straight capture
+          'enable-funding': 'venmo'
         });
       });
     data_collector_instance = await braintree.dataCollector.create({
