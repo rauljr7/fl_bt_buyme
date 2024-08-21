@@ -75,7 +75,6 @@ async function init_payment_options(data) {
     await braintree.paypalCheckout.create({
           client: braintree_client_instance
         }).then(function (paypalCheckoutInstance) {
-            console.log("here");
         return paypalCheckoutInstance.loadPayPalSDK({
           currency: 'USD',
           intent: 'capture', // Fastlane only supports straight capture
@@ -354,40 +353,28 @@ async function process_payment(object) {
 // Initializes PayPal buttons and sets up event handlers for order creation and approval.
 function bootstrap_standard_button(options_object) {
     paypal_button_options = {
-        createOrder: async (data) => {
-            try {
-                // Set up fetch options for creating an order
-                order_fetch_options = {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        method: "create_order",
-                        amount: amount_input_element.value,
-                        payment_source: data.paymentSource,
-/*                  If your website has shipping inputs, you can
-                    pass them here to associate them with this
-                    new Order Creation API Call. */
-/*                         shipping_address: {
-                                "address_line_1": "123 Townsend St",
-                                "address_line_2": "Floor 6",
-                                "admin_area_2": "San Francisco",
-                                "admin_area_1": "CA",
-                                "postal_code": "94107",
-                                "country_code": "US"
-                            } */
-                    })
-                };
-                // Send the create order request to the server
-                create_paypal_order_request = await fetch(server_endpoint, order_fetch_options);
-                order_data = await create_paypal_order_request.json();
-                console.log("Order data received:", order_data);
-                if (order_data.id) {
-                    return order_data.id;
-                }
-            } catch (error) {
-                console.error("Error creating order:", error);
-            }
-        },
+        createOrder: function () {
+            return paypalCheckoutInstance.createPayment({
+              flow: 'checkout', // Required
+              amount: amount_input_element.value, // Required
+              currency: 'USD', // Required, must match the currency passed in with loadPayPalSDK
+              intent: 'capture', // Must match the intent passed in with loadPayPalSDK
+                
+/*              If your website has shipping inputs, you can
+                pass them here to associate them with this
+                new fastlane account. */
+/*               shippingAddressOverride: {
+                recipientName: 'Scruff McGruff',
+                line1: '1234 Main St.',
+                line2: 'Unit 1',
+                city: 'Chicago',
+                countryCode: 'US',
+                postalCode: '60652',
+                state: 'IL',
+                phone: '123.456.7890'
+              } */
+            });
+          },
         onApprove: async (data, actions) => {
             console.log("Order approved with data:", data);
             // Process the payment upon order approval
