@@ -71,6 +71,15 @@ async function init_payment_options(data) {
     braintree_client_instance = await braintree.client.create({
         authorization: braintree_client_token
     });
+    // Create a PayPal Checkout component.
+    await braintree.paypalCheckout.create({
+          client: braintree_client_instance
+        }).then(function (paypalCheckoutInstance) {
+        return paypalCheckoutInstance.loadPayPalSDK({
+          currency: 'USD',
+          intent: 'capture' // Fastlane only supports straight capture
+        });
+      });
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
     });
