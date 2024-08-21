@@ -309,7 +309,7 @@ let charge_payment_method = async (request_object) => {
                 payment_method: {
                     type: "paypal",
                     details: {
-                        email: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.email
+                        email: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.payer.email
                     }
                 }
             };
