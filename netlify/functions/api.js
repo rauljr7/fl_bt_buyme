@@ -262,9 +262,7 @@ let charge_payment_method = async (request_object) => {
         if (payment_source === "card") {
             // Add a descriptor for card payments
             gql_payload.variables.input.transaction.descriptor = {
-                name: "BIZNAMEEHERE*",
-                phone: "1234567890",
-                url: "example.com"
+                name: "BIZNAMEEHERE*"
             };
         }
 
@@ -296,9 +294,9 @@ let charge_payment_method = async (request_object) => {
                 payment_method: {
                     type: "card",
                     details: {
-                        brand: json_response.data.chargePaymentMethod.transaction.paymentMethod.brandCode,
-                        last_digits: json_response.data.chargePaymentMethod.transaction.paymentMethod.last4,
-                        name: json_response.data.chargePaymentMethod.transaction.paymentMethod.cardholderName
+                        brand: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.brandCode,
+                        last_digits: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.last4,
+                        name: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.cardholderName
                     }
                 }
             };
@@ -311,7 +309,7 @@ let charge_payment_method = async (request_object) => {
                 payment_method: {
                     type: "paypal",
                     details: {
-                        email: json_response.data.chargePaymentMethod.transaction.paymentMethod.email
+                        email: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.email
                     }
                 }
             };
@@ -324,7 +322,7 @@ let charge_payment_method = async (request_object) => {
                 payment_method: {
                     type: "venmo",
                     details: {
-                        username: json_response.data.chargePaymentMethod.transaction.paymentMethod.username
+                        username: json_response.data.chargePaymentMethod.transaction.paymentMethodSnapshot.username
                     }
                 }
             };
