@@ -380,9 +380,11 @@ function bootstrap_standard_button(options_object) {
         onApprove: function (data, actions) {
             console.log("Order approved with data:", data);
             return paypal_checkout_instance.tokenizePayment(data).then(async function (payload) {
+                console.log("data:", data);
+                console.log("Payload:", payload);
                 // Process the payment upon order approval
                 try {
-                    await process_payment({ "payment_method_nonce": payload.nonce, "payment_source": "card" });
+                    await process_payment({ "payment_method_nonce": payload.nonce, "payment_source": data.paymentSource });
                 } catch (error) {
                     console.error("Error processing payment:", error);
                 }
