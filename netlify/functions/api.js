@@ -262,7 +262,9 @@ let charge_payment_method = async (request_object) => {
         if (payment_source === "card") {
             // Add a descriptor for card payments
             gql_payload.variables.input.transaction.descriptor = {
-                name: "BIZNAME HERE"  // Placeholder value for the business name field on the customer's statement
+                name: "BIZNAME HERE",
+                phone: "1234567890",
+                url: "https://example.com"
             };
         }
 
