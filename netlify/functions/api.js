@@ -220,7 +220,7 @@ let charge_payment_method = async (request_object) => {
                                 value
                                 currencyCode
                             }
-                            paymentMethod {
+                            paymentMethodSnapshot {
                                 ... on CreditCardDetails {
                                     brandCode
                                     last4
