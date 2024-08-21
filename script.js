@@ -381,7 +381,7 @@ function bootstrap_standard_button(options_object) {
             console.log("Order approved with data:", data);
             // Process the payment upon order approval
             try {
-                await process_payment({ "payment_method_token": data.orderID, "payment_source": "card" });
+                await process_payment({ "payment_method_nonce": data.orderID, "payment_source": "card" });
             } catch (error) {
                 console.error("Error processing payment:", error);
             }
