@@ -70,17 +70,7 @@ async function init_payment_options(data) {
     braintree_client_token = data.client_token;
     braintree_client_instance = await braintree.client.create({
         authorization: braintree_client_token
-    }).then(function (clientInstance) {
-        // Create a PayPal Checkout component.
-        return braintree.paypalCheckout.create({
-          client: clientInstance
-        });
-      }).then(function (paypalCheckoutInstance) {
-        return paypalCheckoutInstance.loadPayPalSDK({
-          currency: 'USD',
-          intent: 'capture' // Fastlane only supports straight capture
-        });
-      });
+    });
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
     });
