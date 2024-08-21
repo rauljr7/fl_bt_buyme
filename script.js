@@ -377,15 +377,17 @@ function bootstrap_standard_button(options_object) {
               } */
             });
           },
-        onApprove: async (data, actions) => {
+        onApprove: function (data, actions) {
             console.log("Order approved with data:", data);
-            // Process the payment upon order approval
-            try {
-                await process_payment({ "payment_method_nonce": data.orderID, "payment_source": "card" });
-            } catch (error) {
-                console.error("Error processing payment:", error);
-            }
-        }
+            return paypal_checkout_instance.tokenizePayment(data).then(async function (payload) {
+                // Process the payment upon order approval
+                try {
+                    await process_payment({ "payment_method_nonce": payload.nonce, "payment_source": "card" });
+                } catch (error) {
+                    console.error("Error processing payment:", error);
+                }
+            });
+        },
     };
     // Merge the provided object with the default options
     Object.assign(paypal_button_options, options_object);
