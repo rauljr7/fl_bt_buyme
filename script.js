@@ -9,7 +9,8 @@ let FastlanePaymentComponent;
 let FastlaneWatermarkComponent;
 let braintree_client_token;
 let braintree_client_instance;
-let paypal_checkout_instance;
+let paypal_client_instance;
+let venmo_client_instance;
 let data_collector_instance;
 let client_id;
 let fastlane_style_object;
@@ -75,8 +76,8 @@ async function init_payment_options(data) {
     await braintree.paypalCheckout.create({
           client: braintree_client_instance
         }).then(function (paypalCheckoutInstance) {
-        paypal_checkout_instance = paypalCheckoutInstance;
-        return paypal_checkout_instance.loadPayPalSDK({
+        paypal_client_instance = paypalCheckoutInstance;
+        return paypal_client_instance.loadPayPalSDK({
           currency: 'USD',
           intent: 'capture', // Fastlane only supports straight capture
           'enable-funding': 'venmo'
@@ -174,7 +175,7 @@ async function init_fastlane_methods() {
 /*          If your website has shipping inputs, you can
             pass them here to associate them with this
             new fastlane account. */
-/*           shippingAddress: {
+          shippingAddress: {
                 firstName: "Jen",
                 lastName: "Smith",
                 company: "PayPal",
@@ -186,7 +187,7 @@ async function init_fastlane_methods() {
                 countryCodeAlpha2: "US",
                 phoneNumber: "14155551212"
                 
-              } */
+              }
         };
         // To use the "Flexible" Fastlane integration where you have
         // more customized UI, you can use the following instead:
@@ -346,7 +347,7 @@ async function process_payment(object) {
 function bootstrap_standard_button(options_object) {
     paypal_button_options = {
         createOrder: function () {
-            return paypal_checkout_instance.createPayment({
+            return paypal_client_instance.createPayment({
               flow: 'checkout', // Required
               amount: amount_input_element.value, // Required
               currency: 'USD', // Required, must match the currency passed in with loadPayPalSDK
@@ -369,7 +370,7 @@ function bootstrap_standard_button(options_object) {
           },
         onApprove: function (data, actions) {
             console.log("Order approved with data:", data);
-            return paypal_checkout_instance.tokenizePayment(data).then(async function (payload) {
+            return paypal_client_instance.tokenizePayment(data).then(async function (payload) {
                 console.log("Payload:", payload);
                 // Process the payment upon order approval
                 try {
