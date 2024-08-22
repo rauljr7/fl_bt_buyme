@@ -90,7 +90,7 @@ async function init_payment_options(data) {
     init_fastlane_methods();
     paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
         shape: "rect",
-        color: "gold",
+        color: "blue",
         label: "paypal",
         height: 55
     }});
@@ -175,7 +175,7 @@ async function init_fastlane_methods() {
 /*          If your website has shipping inputs, you can
             pass them here to associate them with this
             new fastlane account. */
-          shippingAddress: {
+/*           shippingAddress: {
                 firstName: "Jen",
                 lastName: "Smith",
                 company: "PayPal",
@@ -187,7 +187,7 @@ async function init_fastlane_methods() {
                 countryCodeAlpha2: "US",
                 phoneNumber: "14155551212"
                 
-              }
+              } */
         };
         // To use the "Flexible" Fastlane integration where you have
         // more customized UI, you can use the following instead:
