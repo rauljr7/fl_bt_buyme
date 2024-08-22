@@ -20,12 +20,8 @@ exports.handler = async (event) => {
             return handle_fastlane_auth();
         case "auth":
             return handle_auth();
-        case "card_order":
-            return handle_card_order(request_body);
-        case "create_order":
-            return handle_create_order(request_body);
         case "complete_order":
-            return handle_card_order(request_body);
+            return handle_complete_order(request_body);
         default:
             console.error("Invalid method:", request_body.method);
             return {
@@ -66,7 +62,7 @@ let handle_fastlane_auth = async () => {
 };
 
 // Handle Card Order
-let handle_card_order = async (request_body) => {
+let handle_complete_order = async (request_body) => {
     try {
         let { amount, payment_source, payment_method_nonce, shipping_address } = request_body;
         let create_order_response = await charge_payment_method({ amount, payment_source, payment_method_nonce, shipping_address });
@@ -82,92 +78,6 @@ let handle_card_order = async (request_body) => {
             statusCode: 500,
             body: error.toString()
         };
-    }
-};
-
-// Handle Create Order
-let handle_create_order = async (request_body) => {
-    try {
-        let { amount, payment_source, shipping_address } = request_body;
-        let create_order_request = await create_order({ amount, payment_source, shipping_address });
-
-        return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(create_order_request)
-        };
-    } catch (error) {
-        console.error("Error in handle_create_order:", error);
-        return {
-            statusCode: 500,
-            body: error.toString()
-        };
-    }
-};
-
-// Handle Complete Order
-let handle_complete_order = async (request_body) => {
-    try {
-        let capture_paypal_order_response = await capture_paypal_order(request_body.order_id);
-        return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(capture_paypal_order_response)
-        };
-    } catch (error) {
-        console.error("Error in handle_complete_order:", error);
-        return {
-            statusCode: 500,
-            body: error.toString()
-        };
-    }
-};
-
-// Capture PayPal Order
-// https://developer.paypal.com/docs/api/orders/v2/#orders_capture
-let capture_paypal_order = async (order_id) => {
-    try {
-        let access_token_response = await get_access_token();
-        let access_token = access_token_response.access_token;
-        let url = `${BRAINTREE_API_BASE_URL}/v2/checkout/orders/${order_id}/capture`;
-        console.log("How does this work?:", url);
-        let capture_request = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${access_token}`
-            },
-            body: "{}"
-        });
-        let capture_response = await capture_request.json();
-        // You always want to sanitize API responses. No need to send the full
-        // data dump to the client as to avoid unwanted data exposure
-        let sanitized_paypal_capture_response = {
-            amount: {
-                value: capture_response.purchase_units[0].payments.captures[0].amount.value,
-                currency: capture_response.purchase_units[0].payments.captures[0].amount.currency_code
-            },
-            payment_method: {}
-        };
-        // Check for PayPal details and set payment method accordingly
-        if (capture_response.payment_source.paypal) {
-            sanitized_paypal_capture_response.payment_method.type = "paypal";
-            sanitized_paypal_capture_response.payment_method.details = {
-                email: capture_response.payment_source.paypal.email_address
-            };
-        }
-        // Check for Venmo details and set payment method accordingly
-        if (capture_response.payment_source.venmo) {
-            sanitized_paypal_capture_response.payment_method.type = "venmo";
-            sanitized_paypal_capture_response.payment_method.details = {
-                email: capture_response.payment_source.venmo.email_address
-            };
-        }
-        console.log("Capture Order Response:", JSON.stringify(capture_response, null, 2));
-        return sanitized_paypal_capture_response;
-    } catch (error) {
-        console.error("Error in capture_paypal_order:", error);
-        throw error;
     }
 };
 
