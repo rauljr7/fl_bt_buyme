@@ -46,6 +46,7 @@ let server_endpoint = "/.netlify/functions/api/"; // Replace with your own serve
 let payment_method_nonce;
 let fastlane_options_object;
 let payment_source;
+let venmo_svg_string;
 
 // Entry point
 get_auth()
@@ -90,10 +91,10 @@ async function init_payment_options(data) {
         allowNewBrowserTab: true,
         mobileWebFallBack: true,
     });
-    let venmo_svg_string = `<div id="venmo_button" onmouseover="this.style.backgroundColor='#0085F2';" onmouseout="this.style.backgroundColor='#008CFF';" style="cursor:pointer;height:48px;background-color: #008CFF; border-radius: 4px; display: flex; justify-content: center; align-items: center; padding: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
+    venmo_svg_string = `<div id="venmo_button" onmouseover="this.style.backgroundColor='#0085F2';" onmouseout="this.style.backgroundColor='#008CFF';" style="cursor:pointer;height:48px;background-color: #008CFF; border-radius: 4px; display: flex; justify-content: center; align-items: center; padding: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
     <img style="width:70px" src="venmo-logo.svg" alt="Venmo Logo">
 </div>`;
-    venmo_button_container.innerHTML = venmo_svg;
+    venmo_button_container.innerHTML = venmo_svg_string;
     venmo_button = document.getElementById("venmo_button");
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
