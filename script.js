@@ -110,7 +110,6 @@ async function init_payment_options(data) {
         client: braintree_client_instance
     });
     device_data = data_collector_instance.deviceData;
-    init_fastlane_methods();
     paypal_button = bootstrap_standard_button({ fundingSource: "paypal", style: {
         shape: "rect",
         color: "gold",
@@ -118,6 +117,7 @@ async function init_payment_options(data) {
         height: 55
     }});
     paypal_button.render("#paypal_button_container");
+    init_fastlane_methods();
 }
 // Initializes Fastlane methods and sets up event handlers.
 async function init_fastlane_methods() {
