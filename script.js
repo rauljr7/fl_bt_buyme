@@ -41,7 +41,6 @@ let lookup_response;
 let customer_context_id;
 let tokenize_response;
 let tokenize_id;
-let order_id;
 let server_endpoint = "/.netlify/functions/api/"; // Replace with your own server endpoint
 let payment_method_nonce;
 let fastlane_options_object;
@@ -315,24 +314,15 @@ function handle_guest_payer() {
 async function process_payment(object) {
     payment_method_nonce = object.payment_method_nonce;
     payment_source = object.payment_source;
-    order_id = object.order_id;
     console.log("Processing payment, have this profile data avail:", profile_data);
-    // Determine the method based on the payment source
-    if (payment_source === "card") {
-        method = "card_order";
-        console.log(`Processing payment with payment_method_nonce: ${payment_method_nonce} and payment_source: ${payment_source}`);
-    } else {
-        method = "complete_order";
-        console.log(`Processing payment with order_id: ${order_id} and payment_source: ${payment_source}`);
-    }
+    console.log(`Processing payment with payment_method_nonce: ${payment_method_nonce} and payment_source: ${payment_source}`);
     // Set up fetch options for the API call
     payment_fetch_options = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            method: method,
+            method: "complete_order",
             amount: amount_input_element.value,
-            order_id: order_id,
             payment_source: payment_source,
             payment_method_nonce: payment_method_nonce
         })
@@ -380,7 +370,6 @@ function bootstrap_standard_button(options_object) {
         onApprove: function (data, actions) {
             console.log("Order approved with data:", data);
             return paypal_checkout_instance.tokenizePayment(data).then(async function (payload) {
-                console.log("data:", data);
                 console.log("Payload:", payload);
                 // Process the payment upon order approval
                 try {
