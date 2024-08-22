@@ -84,7 +84,7 @@ async function init_payment_options(data) {
         });
       });
       // Create Venmo Instance.
-      await braintree.venmo.create({
+      venmo_client_instance = await braintree.venmo.create({
         client: braintree_client_instance,
         paymentMethodUsage: 'single_use',
         allowDesktopWebLogin: true,
@@ -96,6 +96,16 @@ async function init_payment_options(data) {
 </div>`;
     venmo_button_container.innerHTML = venmo_svg_string;
     venmo_button = document.getElementById("venmo_button");
+    venmo_button.addEventListener('click', function () {
+        venmo_client_instance.tokenize().then(async function (payload) {
+            // Process the payment upon order approval
+            try {
+                await process_payment({ "payment_method_nonce": payload.nonce, "payment_source": "venmo" });
+            } catch (error) {
+                console.error("Error processing payment:", error);
+            }
+          });
+      });
     data_collector_instance = await braintree.dataCollector.create({
         client: braintree_client_instance
     });
