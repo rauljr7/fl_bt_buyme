@@ -91,7 +91,7 @@ async function init_payment_options(data) {
         allowNewBrowserTab: true,
         mobileWebFallBack: true,
     });
-    venmo_svg_string = `<div id="venmo_button" onmouseover="this.style.backgroundColor='#0085F2';" onmouseout="this.style.backgroundColor='#008CFF';" style="cursor:pointer;height:48px;background-color: #008CFF; border-radius: 4px; display: flex; justify-content: center; align-items: center; padding: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
+    venmo_svg_string = `<div id="venmo_button" onmouseover="this.style.backgroundColor='#0085F2';" onmouseout="this.style.backgroundColor='#008CFF';" style="cursor:pointer;height:46px;background-color: #008CFF; border-radius: 4px; display: flex; justify-content: center; align-items: center; padding: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
     <img style="width:70px" src="venmo-logo.svg" alt="Venmo Logo">
 </div>`;
     venmo_button_container.innerHTML = venmo_svg_string;
