@@ -428,9 +428,13 @@ function ui_display_receipt(process_payment_response) {
         payment_method_element.textContent = `💳 ${process_payment_response.payment_method.details.brand} ending in ${process_payment_response.payment_method.details.last_digits}`;
         buyer_email_element.textContent = document.getElementById("email").value;
     } else
-    if (process_payment_response.payment_method.type === "paypal" || process_payment_response.payment_method.type === "venmo") {
+    if (process_payment_response.payment_method.type === "paypal") {
         payment_method_element.textContent = process_payment_response.payment_method.type.charAt(0).toUpperCase() + process_payment_response.payment_method.type.slice(1);
         buyer_email_element.textContent = process_payment_response.payment_method.details.email;
+    } else
+    if (process_payment_response.payment_method.type === "venmo") {
+        payment_method_element.textContent = process_payment_response.payment_method.type.charAt(0).toUpperCase() + process_payment_response.payment_method.type.slice(1);
+        buyer_email_element.textContent = process_payment_response.payment_method.details.username;
     }
 }
 
