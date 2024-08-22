@@ -434,7 +434,7 @@ function ui_display_receipt(process_payment_response) {
     } else
     if (process_payment_response.payment_method.type === "venmo") {
         payment_method_element.textContent = process_payment_response.payment_method.type.charAt(0).toUpperCase() + process_payment_response.payment_method.type.slice(1);
-        buyer_email_element.textContent = process_payment_response.payment_method.details.username;
+        buyer_email_element.textContent = "@" + process_payment_response.payment_method.details.username;
     }
 }
 
