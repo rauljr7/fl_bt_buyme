@@ -174,25 +174,6 @@ async function init_fastlane_methods() {
         card_fields_container.style.setProperty("width", "calc(100% - 32px)", "important");
         card_fields_container.style["margin-bottom"] = "13px";
         fastlane_options_object = {
-            styles: {
-                root: {
-                    backgroundColor: "white",
-                    errorColor: "red",
-                    fontFamily: "Arial, sans-serif",
-                    textColorBase: "black",
-                    fontSizeBase: "16px",
-                    padding: "0px",
-                    primaryColor: "black",
-                },
-                input: {
-                    backgroundColor: "white",
-                    borderRadius: "4px",
-                    borderColor: "#e6e6e6",
-                    borderWidth: "1px",
-                    textColorBase: "black",
-                    focusBorderColor: "black",
-                }
-            },
 /*          If your website has shipping inputs, you can
             pass them here to associate them with this
             new fastlane account. */
