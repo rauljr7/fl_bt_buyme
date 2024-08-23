@@ -61,6 +61,53 @@ let handle_fastlane_auth = async () => {
     }
 };
 
+// Create Client Token
+let create_client_token = async (options = { fastlane: false }) => {
+    try {
+        let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
+        let fetch_options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${auth}`,
+                'Braintree-Version': '2020-08-25',
+            },
+            body: JSON.stringify({
+                query: `mutation ($input: CreateClientTokenInput) { createClientToken(input: $input) { clientToken }}`,
+                variables: {
+                    input: {}
+                },
+            }),
+        };
+
+        // If fastlane is true, add the domains to the input
+        if (options.fastlane) {
+            fetch_options.body = JSON.stringify({
+                query: `mutation ($input: CreateClientTokenInput) { createClientToken(input: $input) { clientToken }}`,
+                variables: {
+                    input: {
+                        clientToken: {
+                            domains: FASTLANE_APPROVED_DOMAINS_CSV.split(',')
+                        },
+                    },
+                },
+            });
+        }
+        
+        let response = await fetch(BRAINTREE_API_BASE_URL, fetch_options);
+        let data = await response.json();
+        console.log("Braintree Create Client Token Response:", JSON.stringify(data, null, 2));
+        if (response.ok) {
+            return data.data.createClientToken.clientToken;
+        } else {
+            throw new Error(JSON.stringify(data.errors));
+        }
+    } catch (error) {
+        console.error("Error in create_client_token:", error);
+        throw error;
+    }
+};
+
 // Handle Card Order
 let handle_complete_order = async (request_body) => {
     try {
@@ -177,7 +224,7 @@ let charge_payment_method = async (request_object) => {
         }
 
         console.log("Payload before charging payment method:", JSON.stringify(gql_payload, null, 2));
-
+        // Make the API request
         let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
         let charge_payment_request = await fetch(BRAINTREE_API_BASE_URL, {
             headers: {
@@ -248,53 +295,5 @@ let charge_payment_method = async (request_object) => {
             statusCode: 400,
             body: error.toString()
         };
-    }
-};
-
-
-// Create Client Token
-let create_client_token = async (options = { fastlane: false }) => {
-    try {
-        let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
-        let fetch_options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${auth}`,
-                'Braintree-Version': '2020-08-25',
-            },
-            body: JSON.stringify({
-                query: `mutation ($input: CreateClientTokenInput) { createClientToken(input: $input) { clientToken }}`,
-                variables: {
-                    input: {}
-                },
-            }),
-        };
-
-        // If fastlane is true, add the domains to the input
-        if (options.fastlane) {
-            fetch_options.body = JSON.stringify({
-                query: `mutation ($input: CreateClientTokenInput) { createClientToken(input: $input) { clientToken }}`,
-                variables: {
-                    input: {
-                        clientToken: {
-                            domains: FASTLANE_APPROVED_DOMAINS_CSV.split(',')
-                        },
-                    },
-                },
-            });
-        }
-        
-        let response = await fetch(BRAINTREE_API_BASE_URL, fetch_options);
-        let data = await response.json();
-        console.log("Braintree Create Client Token Response:", JSON.stringify(data, null, 2));
-        if (response.ok) {
-            return data.data.createClientToken.clientToken;
-        } else {
-            throw new Error(JSON.stringify(data.errors));
-        }
-    } catch (error) {
-        console.error("Error in create_client_token:", error);
-        throw error;
     }
 };
