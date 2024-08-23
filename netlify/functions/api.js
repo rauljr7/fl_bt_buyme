@@ -7,8 +7,8 @@ let FASTLANE_APPROVED_DOMAINS_CSV = process.env.FASTLANE_APPROVED_DOMAINS_CSV;
 // You don't have to use GraphQL for Braintree,
 // you can also use our SDKs (Java, .NET, Node.js, PHP, Python, Ruby):
 // https://developer.paypal.com/braintree/docs/start/hello-server
-//let BRAINTREE_API_BASE_URL = "https://payments.sandbox.braintree-api.com/graphql";
-let BRAINTREE_API_BASE_URL = "https://payments.braintree-api.com/graphql";
+let BRAINTREE_API_BASE_URL = "https://payments.sandbox.braintree-api.com/graphql";
+//let BRAINTREE_API_BASE_URL = "https://payments.braintree-api.com/graphql";
 
 // Routes
 exports.handler = async (event) => {
