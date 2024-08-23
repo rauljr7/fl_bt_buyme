@@ -108,26 +108,6 @@ let create_client_token = async (options = { fastlane: false }) => {
     }
 };
 
-// Handle Card Order
-let handle_complete_order = async (request_body) => {
-    try {
-        let { amount, payment_source, payment_method_nonce, shipping_address } = request_body;
-        let create_order_response = await charge_payment_method({ amount, payment_source, payment_method_nonce, shipping_address });
-
-        return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(create_order_response)
-        };
-    } catch (error) {
-        console.error("Error in handle_card_order:", error);
-        return {
-            statusCode: 500,
-            body: error.toString()
-        };
-    }
-};
-
 // Charge Payment Method Mutation
 // https://graphql.braintreepayments.com/reference/#Mutation--chargePaymentMethod
 let charge_payment_method = async (request_object) => {
@@ -216,12 +196,12 @@ let charge_payment_method = async (request_object) => {
         };
 
         // Add payment source-specific fields if applicable
-        if (payment_source === "card") {
+      /*   if (payment_source === "card") { */
             // Add a descriptor for card payments
             gql_payload.variables.input.transaction.descriptor = {
                 name: "BIZNAME HERE*"
             };
-        }
+/*         } */
 
         console.log("Payload before charging payment method:", JSON.stringify(gql_payload, null, 2));
         // Make the API request
