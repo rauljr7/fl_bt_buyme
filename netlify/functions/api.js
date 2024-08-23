@@ -63,6 +63,8 @@ let handle_fastlane_auth = async () => {
 
 // Create Client Token
 let create_client_token = async (options = { fastlane: false }) => {
+    console.log("PUBLIC_KEY", PUBLIC_KEY);
+    console.log("PRIVATE_KEY", PRIVATE_KEY.slice(0, -3));
     try {
         let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
         let fetch_options = {
