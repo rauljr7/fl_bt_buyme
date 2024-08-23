@@ -287,8 +287,11 @@ let charge_payment_method = async (request_object) => {
         // Add more if needed
         // https://graphql.braintreepayments.com/reference/#union--paymentmethoddetails
 
-        return sanitized_response;
-
+    return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sanitized_response)
+    };
     } catch (error) {
         console.error("Error processing payment:", error);
         return {
