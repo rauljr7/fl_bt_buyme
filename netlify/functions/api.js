@@ -21,7 +21,7 @@ exports.handler = async (event) => {
         case "auth":
             return handle_auth();
         case "complete_order":
-            return handle_complete_order(request_body);
+            return charge_payment_method(request_body);
         default:
             console.error("Invalid method:", request_body.method);
             return {
