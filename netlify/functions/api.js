@@ -63,8 +63,6 @@ let handle_fastlane_auth = async () => {
 
 // Create Client Token
 let create_client_token = async (options = { fastlane: false }) => {
-    console.log("PUBLIC_KEY", PUBLIC_KEY);
-    console.log("PRIVATE_KEY", PRIVATE_KEY.slice(0, -3));
     try {
         let auth = Buffer.from(`${PUBLIC_KEY}:${PRIVATE_KEY}`).toString("base64");
         let fetch_options = {
@@ -198,12 +196,12 @@ let charge_payment_method = async (request_object) => {
         };
 
         // Add payment source-specific fields if applicable
-      /*   if (payment_source === "card") { */
+        if (payment_source === "card") {
             // Add a descriptor for card payments
             gql_payload.variables.input.transaction.descriptor = {
                 name: "BIZNAME HERE*"
             };
-/*         } */
+        }
 
         console.log("Payload before charging payment method:", JSON.stringify(gql_payload, null, 2));
         // Make the API request
